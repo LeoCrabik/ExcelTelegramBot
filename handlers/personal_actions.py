@@ -38,9 +38,9 @@ class Paths:
 
 @dp.message_handler(commands=["start"])
 async def setlink_command(message: types.Message):
-	config.WAITING_FOR_FILE = True 
-
-	await message.answer("Привет, " + message.from_user.first_name + ". Пожалуйста, загрузи файл")
+	#config.WAITING_FOR_FILE = True 
+	await message.answer("Hello, " + message.from_user.first_name + ". Please choose your language", reply_markup=kb.langkb)
+	#await message.answer("Привет, " + message.from_user.first_name + ". Пожалуйста, загрузи файл")
 
 
 @dp.message_handler(commands=["info"])
@@ -50,8 +50,19 @@ async def setlink_command(message: types.Message):
 	for i in  range(0,len(Paths.File_List)):
 		await message.answer(str(i+1)+": " + Paths.File_List[i])
 		print(str(i+1)+": " + Paths.File_List[i])
-	await message.answer("Введите цифру файла, который хотите скачать")
+	if config.LANG_EN:
+		await message.answer("Enter number of file to download")
+	else:
+		await message.answer("Введите цифру файла, который хотите скачать")
 	config.CAN_ENTER_NUMBER=True
+
+@dp.message_handler(commands=["excel"])
+async def setlink_command(message: types.Message):
+	config.WAITING_FOR_FILE = True 
+	if config.LANG_EN:
+		await message.answer("Upload the file")
+	else:
+		await message.answer("Пожалуйста, загрузи файл")
 
 @dp.message_handler(content_types=ContentTypes.DOCUMENT, state=None)
 async def doc_handler(message: types.Message):
@@ -64,14 +75,20 @@ async def doc_handler(message: types.Message):
 		Paths.FinalPath ="data/" +  str(message.from_user.id) + "/result/"
 		await document.download(destination_file=Paths.FilePath)
 		await FSMAdmin.NameColumn_name.set()
-		await message.answer("Введите название колонки с именами")
+		if config.LANG_EN:
+			await message.answer("Enter the title of column with names")
+		else:
+			await message.answer("Введите название колонки с именами")
 
 @dp.message_handler(state=FSMAdmin.NameColumn_name)
 async def load_namecolumn(message: types.Message, state: FSMContext):
 	async with state.proxy() as data:
 		data['NameColumn_name'] = message.text
 	await FSMAdmin.BalanceColumn_name.set()
-	await message.answer("Теперь введите название колонки с балансом")
+	if config.LANG_EN:
+		await message.answer("Enter the title of column with balance")
+	else:
+		await message.answer("Теперь введите название колонки с балансом")
 
 @dp.message_handler(state=FSMAdmin.BalanceColumn_name)
 async def load_balancecolumn(message: types.Message, state: FSMContext):
@@ -84,7 +101,10 @@ async def load_balancecolumn(message: types.Message, state: FSMContext):
 		ColumnNames.Title_of_Names = data['NameColumn_name']
 	await state.finish()
 	config.IS_DATA_INSETED = True
-	await message.answer("Выберете, что делать дальше", reply_markup=kb.keyboard1)
+	if config.LANG_EN:
+		await message.answer("Choose next step", reply_markup=kb.keyboard1_en)
+	else:
+		await message.answer("Выберете, что делать дальше", reply_markup=kb.keyboard1_ru)
 	nd.Preresult(ColumnNames.Title_of_Names, ColumnNames.Title_of_Balance)
 
 
@@ -92,8 +112,12 @@ async def load_balancecolumn(message: types.Message, state: FSMContext):
 async def tablesdata(message: types.Message):
 	if config.CAN_INSERT_NAMES:
 		if message.text != "/stop":
-			await message.answer("Суммарный баланс " + message.text +": "+ str(math.ceil(nd.DataProcessing(message.text)*100)/100))
-			await message.answer("Введите следующее имя" , reply_markup=kb.stop)
+			if config.LANG_EN:
+				await message.answer("Summary balance of " + message.text +" is "+ str(math.ceil(nd.DataProcessing(message.text)*100)/100))
+				await message.answer("Enter another name", reply_markup=kb.stop)
+			else:
+				await message.answer("Суммарный баланс " + message.text +": "+ str(math.ceil(nd.DataProcessing(message.text)*100)/100))
+				await message.answer("Введите следующее имя" , reply_markup=kb.stop)
 		else:
 			try: 
 				os.mkdir(Paths.FinalPath)
@@ -102,10 +126,16 @@ async def tablesdata(message: types.Message):
 			nd.DataProcessingFinal()
 			await bot.send_document(message.chat.id, open(Paths.FinalFilePath, 'rb'))
 			config.CAN_INSERT_NAMES=False
-			await message.answer("Надеюсь, смог помочь ;)" , reply_markup=kb.start)		
+			if config.LANG_EN:
+				await message.answer("Wish I could help you ;)", reply_markup=kb.start)
+			else:
+				await message.answer("Надеюсь, смог помочь ;)" , reply_markup=kb.start)		
 	elif config.CAN_ENTER_NUMBER:
 		await bot.send_document(message.chat.id, open(Paths.FinalPath+Paths.File_List[int(message.text)-1], 'rb'))
-		await message.answer("Надеюсь, смог помочь ;)" , reply_markup=kb.start)	
+		if config.LANG_EN:
+			await message.answer("Wish I could help you ;)", reply_markup=kb.start)
+		else:
+			await message.answer("Надеюсь, смог помочь ;)" , reply_markup=kb.start)	
 		config.CAN_ENTER_NUMBER=False
 
 
