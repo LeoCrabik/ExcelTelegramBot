@@ -22,9 +22,9 @@ async def proccess_callback_can_insert_names(callback : types.CallbackQuery):
 async def proccess_callback_can_download_preresult(callback: types.CallbackQuery):
 	await callback.message.delete()
 	if config.LANG_EN:
-		await callback.message.answer("Wish I could help you ;)")
+		await callback.message.answer("Wish I could help you ;)", reply_markup=kb.start)
 	else:
-		await callback.message.answer("Надеюсь, что смог помочь ;)")
+		await callback.message.answer("Надеюсь, что смог помочь ;)", reply_markup=kb.start)
 	await bot.send_document(callback.message.chat.id, open(pa.Paths.PreresultFilePath, 'rb'))
 	await callback.answer()
 
