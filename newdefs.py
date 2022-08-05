@@ -1,13 +1,12 @@
 from openpyxl import Workbook,load_workbook
 import math
-from dispatcher import bot
 from handlers import personal_actions as pa
 from aiogram import types
-from dispatcher import dp
 from aiogram.types import ContentTypes
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 import os
+from decimal import Decimal as d
 
 date=None
 TableI=0
@@ -31,12 +30,9 @@ def Preresult(TON, TOB):
 		except:
 			print("Пизда 1")
 		try:
-			print(TOB)
-			print()
 			for i in range(1,10):
 				for i1 in range(1,30):
 					value=wsSearch.cell(row=i, column=i1).value
-					print(value)
 					if value == TOB:
 						pa.ColumnsIDs.BalanceColumn = i1
 						pa.ColumnsIDs.BalanceRaw = i
@@ -44,12 +40,9 @@ def Preresult(TON, TOB):
 		except: 
 			print("Пизда 2")
 		try:
-			print(TON)
-			print()
 			for i in range(1,10):
 				for i1 in range(1,30):
 					value=wsSearch.cell(row=i, column=i1).value
-					print(value)
 					if value == TON:
 						pa.ColumnsIDs.NameColumn = i1
 						pa.ColumnsIDs.NameRaw = i
@@ -57,22 +50,16 @@ def Preresult(TON, TOB):
 		except:
 			print("Пизда 3")
 		try:
-			print(pa.ColumnsIDs.BalanceColumn, pa.ColumnsIDs.BalanceRaw)
-			print(pa.ColumnsIDs.NameColumn, pa.ColumnsIDs.NameRaw)
 			wbResult = Workbook()
 			wsResult = wbResult.active
 			i1=pa.ColumnsIDs.NameRaw-1
 			i2=1
 			value1 = wsSearch.cell(row= pa.ColumnsIDs.NameRaw, column = pa.ColumnsIDs.NameColumn).value
-			print(wsSearch.cell(row= pa.ColumnsIDs.NameRaw, column = pa.ColumnsIDs.NameColumn))
-			print(pa.ColumnsIDs.NameRaw, pa.ColumnsIDs.NameColumn)
 			value2 = wsSearch.cell(row= pa.ColumnsIDs.BalanceRaw, column = pa.ColumnsIDs.BalanceColumn).value
-			print(wsSearch.cell(row= pa.ColumnsIDs.BalanceRaw, column = pa.ColumnsIDs.BalanceColumn))
-			print(pa.ColumnsIDs.BalanceRaw, pa.ColumnsIDs.BalanceColumn)
 		except:
 			print("Пизда 4")
 		try:
-			for i in range(pa.ColumnsIDs.BalanceRaw, wsSearch.max_row):
+			for i in range(pa.ColumnsIDs.BalanceRaw, wsSearch.max_row+1):
 				value1 = wsSearch.cell(row=i, column=pa.ColumnsIDs.NameColumn).value 
 				value2 = wsSearch.cell(row=i, column=pa.ColumnsIDs.BalanceColumn).value
 				if wsSearch.cell(row=i, column=pa.ColumnsIDs.NameColumn).value is not None:
@@ -95,12 +82,17 @@ def DataProcessing(Name):
 	wbProcessing = load_workbook(pa.Paths.PreresultFilePath)
 	wsProcessing = wbProcessing.active
 	summary=0
-	for i in range(1, wsProcessing.max_row): 
-		if Name in str(wsProcessing.cell(row=i, column=1).value):
-			summary+=wsProcessing.cell(row=i,column=2).value
+	for i in range(1, wsProcessing.max_row+10): 
+		if str(Name).strip()==str(wsProcessing.cell(row=i, column=1).value).strip():
+			print(wsProcessing.cell(row=i, column=2).value)
+			print()
+			summary+=d(format(wsProcessing.cell(row=i, column=2).value, '.2f'))
+			print(summary)
+			print()
+			print()
 			#print(str(summary)+" "+str(wsProcessing.cell(row=i, column=1).value)+" "+str(wsProcessing.cell(row=i,column=2).value))
 	pa.TableData.Name_list.append(str(Name))
-	pa.TableData.Balance_list.append(str(math.ceil(summary*100)/100))
+	pa.TableData.Balance_list.append(summary)
 	TableI+=1
 	return(summary)
 	summary=0
