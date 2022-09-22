@@ -1,6 +1,6 @@
 # group ids or account ids can be retrieved with @username_to_id_bot
-BOT_TOKEN="5144233701:AAGuO-qtl3UsG6sJ2AWRrTZSdncfhMnnhCg"
-BOT_OWNER=420038215
+BOT_TOKEN=""
+BOT_OWNER=
 
 
 
